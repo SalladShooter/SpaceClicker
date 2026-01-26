@@ -39,9 +39,17 @@ def main(stdscr):
         ['CREDITS', money],
         ['ENERGY', energy],
     ]
-    tick = 0
+    buildings = [
+        # NAME  COST NUM DESC                           OVER
+        ['MINE', 100, 1, "Increase CREDIT gain ability", 1],
+        ['MINE', 100, 0, "Increase CREDIT gain ability", 0],
+        ['MINE', 100, 0, "Increase CREDIT gain ability", 0],
+        ['MINE', 100, 0, "Increase CREDIT gain ability", 0],
+    ]
+    build_selection = 0
+    credit_gain = 1
     location = "Earth"
-    last_key = None
+    tick = 0
 
     def display_center_text(text,y,style=curses.A_NORMAL):
         h, w = stdscr.getmaxyx()
@@ -59,49 +67,77 @@ def main(stdscr):
         except curses.error:
             pass
 
-    def build():
-        pass
-
     def display_resources(width):
         resource_win.erase()
+        resource_win.attrset(BLUE)
         resource_win.border()
         try:
-            resource_win.addstr(0, width//2-len(' RESOURCES ')//2, ' RESOURCES ', STANDOUT)
+            resource_win.addstr(0, width//2-len(' RESOURCES ')//2, ' RESOURCES ', BLUE | STANDOUT)
         except curses.error:
             pass
-
         for resource in range(len(resources)):
             try:
-                resource_win.addstr(resource+1, 1, f'{resources[resource][0]} - {resources[resource][1]}')
+                resource_win.addstr(resource+1, 1, f'{resources[resource][0]} - {resources[resource][1]}', WHITE)
             except curses.error:
                 pass
-
         resource_win.refresh()
 
-    def display_cur_building(width):
-        cur_building_win.erase()
-        cur_building_win.border()
+    def display_overview(width):
+        overview_win.erase()
+        overview_win.attrset(GREEN)
+        overview_win.border()
         try:
-            cur_building_win.addstr(0, width//2-len(' BUILDINGS ')//2, ' BUILDINGS ', STANDOUT)
+            overview_win.addstr(0, width//2-len(' OVERVIEW ')//2, ' OVERVIEW ', GREEN | STANDOUT)
         except curses.error:
             pass
-        cur_building_win.refresh()
+        for building in range(len(buildings)):
+            if not buildings[building][2] == 0 and not buildings[building][4] == 0:
+                try:
+                    overview_win.addstr(building+1, 1, f'{buildings[building][2]} : {buildings[building][0]} - +{buildings[building][2]*buildings[building][4]}C/s', WHITE)
+                except curses.error:
+                    pass
+        overview_win.refresh()
 
     def display_log(width):
         log_win.erase()
+        log_win.attrset(MAGENTA)
         log_win.border()
         try:
-            log_win.addstr(0, width//2-len(' CONSOLE ')//2, ' CONSOLE ', STANDOUT)
+            log_win.addstr(0, width//2-len(' CONSOLE ')//2, ' CONSOLE ', MAGENTA | STANDOUT)
         except curses.error:
             pass
         log_win.refresh()
 
+
+    def display_build(width):
+        build_win.erase()
+        build_win.attrset(YELLOW)
+        build_win.border()
+        try:
+            build_win.addstr(0, width//2-len(' BUILD ')//2, ' BUILD ', YELLOW | STANDOUT)
+        except curses.error:
+            pass
+        for building in range(len(buildings)):
+            try:
+                build_style = NORMAL
+                if build_selection == building:
+                    build_style = STANDOUT
+                build_win.addstr(building+1, 1, f'{buildings[building][2]} : {buildings[building][0]} - C{buildings[building][1]} - {buildings[building][3]}', WHITE | build_style)
+            except curses.error:
+                pass
+
+        build_win.refresh()
+
     h, w = stdscr.getmaxyx()
     last_h, last_w = h, w
+    last_key = None
 
-    resource_win = curses.newwin(h-4,w//3-2,2,2)
-    cur_building_win = curses.newwin(h-4,w//3-2,2,w//3+2)
-    log_win = curses.newwin(h-4,w//3-4,2,w//3*2+2)
+    resource_win = curses.newwin(h-4, w//3, 2, 2)
+    overview_win = curses.newwin(h-4, w//3-1, 2, w//3+2)
+    log_win = curses.newwin(h-4, w//3-1, 2, w//3*2+1)
+    build_win = curses.newwin(h-4, w//3*2-2, 2, w//3+2)
+
+    build_menu = False
 
     stdscr.erase()
     stdscr.border()
@@ -127,19 +163,23 @@ def main(stdscr):
         if (h, w) != (last_h, last_w):
             last_h, last_w = h, w
 
-            resource_win = curses.newwin(h-4,w//3-2,2,2)
-            cur_building_win = curses.newwin(h-4,w//3-2,2,w//3+2)
-            log_win = curses.newwin(h-4,w//3-4,2,w//3*2+2)
+            resource_win = curses.newwin(h-4, w//3, 2, 2)
+            overview_win = curses.newwin(h-4, w//3-1, 2, w//3+2)
+            log_win = curses.newwin(h-4, w//3-1, 2, w//3*2+1)
+            build_win = curses.newwin(h-4, w//3*2-2, 2, w//3+2)
 
             stdscr.clear()
             stdscr.border()
             stdscr.refresh()
 
         display_resources(w//3-2)
-        display_cur_building(w//3-2)
-        display_log(w//3-2)
+        if build_menu:
+            display_build(w//3*2-2)
+        else:
+            display_overview(w//3-2)
+            display_log(w//3-2)
 
-        display_center_text(top_bar_text, 0, DIM)
+        display_center_text(top_bar_text, 0, BOLD)
         display_center_text(bottom_bar_text, h-1, DIM)
 
         last_key = curses.ERR
@@ -148,15 +188,29 @@ def main(stdscr):
             last_key = key
             key = stdscr.getch()
 
+        if build_menu and last_key == curses.KEY_DOWN:
+            if build_selection + 1 < len(buildings):
+                build_selection += 1
+        elif build_menu and last_key == curses.KEY_UP:
+            if build_selection - 1 >= 0:
+                build_selection -= 1
+
         if last_key == ord('c'):
-            money += 1
+            money += credit_gain
             resources[0][1] = money
         elif last_key == ord('b'):
-            build()
+            build_menu = not build_menu
+            stdscr.clear()
+            stdscr.border()
+            stdscr.refresh()
         elif last_key == ord('q'):
             break
 
         tick += 1
+        for building in range(len(buildings)):
+            if not buildings[building][2] == 0 and not buildings[building][4] == 0 and tick % 10 == 0:
+                money += buildings[building][2] * buildings[building][4]
+                resources[0][1] = money
         stdscr.refresh()
         time.sleep(0.1)
 
