@@ -40,11 +40,11 @@ def main(stdscr):
         ['ENERGY', energy],
     ]
     buildings = [
-        # NAME  COST NUM DESC                           OVER
-        ['MINE', 100, 1, "Increase CREDIT gain ability", 1],
-        ['MINE', 100, 0, "Increase CREDIT gain ability", 0],
-        ['MINE', 100, 0, "Increase CREDIT gain ability", 0],
-        ['MINE', 100, 0, "Increase CREDIT gain ability", 0],
+        # NAME  COST NUM DESC                         OVER EN PER
+        ['MINE', 100, 1, "Increase CREDIT gain ability", 1, 0, 10],
+        ['SHIP', 50, 0, "Increase CREDIT gain ability", 0, 1, 0],
+        ['DOCK', 100, 0, "Increase CREDIT gain ability", 0, 3, 0],
+        ['SHUTTLE', 100, 0, "Increase CREDIT gain ability", 10, 5, 0],
     ]
     build_selection = 0
     credit_gain = 1
@@ -93,7 +93,12 @@ def main(stdscr):
         for building in range(len(buildings)):
             if not buildings[building][2] == 0 and not buildings[building][4] == 0:
                 try:
-                    overview_win.addstr(building+1, 1, f'{buildings[building][2]} : {buildings[building][0]} - +{buildings[building][2]*buildings[building][4]}C/s', WHITE)
+                    total_energy = buildings[building][2] * buildings[building][6] -  buildings[building][2] * buildings[building][5]
+                    if total_energy < 0:
+                        energy_symbol = ''
+                    else:
+                        energy_symbol = '+'
+                    overview_win.addstr(building+1, 1, f'{buildings[building][2]} : {buildings[building][0]} - +{buildings[building][2]*buildings[building][4]}C/s {energy_symbol}{total_energy}E/s', WHITE)
                 except curses.error:
                     pass
         overview_win.refresh()
@@ -195,6 +200,12 @@ def main(stdscr):
             if build_selection - 1 >= 0:
                 build_selection -= 1
 
+        if build_menu and last_key == ord('u'):
+            if money >= buildings[build_selection][1]:
+                money -= buildings[build_selection][1]
+                buildings[build_selection][1] = round(buildings[build_selection][1] * 1.4)
+                buildings[build_selection][2] += 1
+
         if last_key == ord('c'):
             money += credit_gain
             resources[0][1] = money
@@ -208,9 +219,13 @@ def main(stdscr):
 
         tick += 1
         for building in range(len(buildings)):
-            if not buildings[building][2] == 0 and not buildings[building][4] == 0 and tick % 10 == 0:
-                money += buildings[building][2] * buildings[building][4]
-                resources[0][1] = money
+            if buildings[building][2] > 0 and not buildings[building][4] == 0 and tick % 10 == 0:
+                if (buildings[building][5] > 0 and energy > 0) or buildings[building][5] == 0:
+                    money += round(buildings[building][2] * buildings[building][4])
+                energy -= buildings[building][2] * buildings[building][5]
+                energy += buildings[building][2] * buildings[building][6]
+                resources[0][1] = round(money)
+                resources[1][1] = energy
         stdscr.refresh()
         time.sleep(0.1)
 
