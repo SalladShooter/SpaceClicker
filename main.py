@@ -35,16 +35,22 @@ def main(stdscr):
 
     money = 0
     energy = 0
+    silver = 0
+    titaniun = 0
+    uranium = 0
     resources = [
         ['CREDITS', money],
         ['ENERGY', energy],
+        ['SILVER', silver],
+        ['TITANIUM', titanium],
+        ['URANIUM', uranium],
     ]
     buildings = [
-        # NAME  COST NUM DESC                         OVER EN PER
-        ['MINE', 100, 1, "Increase CREDIT gain ability", 1, 0, 10],
-        ['SHIP', 50, 0, "Increase CREDIT gain ability", 0, 1, 0],
-        ['DOCK', 100, 0, "Increase CREDIT gain ability", 0, 3, 0],
-        ['SHUTTLE', 100, 0, "Increase CREDIT gain ability", 10, 5, 0],
+        # NAME       CC SC TC UC NUM DESC                            OVER  EN PER SIL TIT URA
+        ['MINE',    100, 0, 0, 0, 1, "Increase CREDIT gain ability",   1,  0, 10,  0,  0,  0],
+        ['SHIP',     50, 0, 0, 0, 0, "Increase SILVER gain ability",   0,  1,  0,  0,  0,  0],
+        ['DOCK',    100, 0, 0, 0, 0, "Increase TITANIUM gain ability", 0,  3,  0,  0,  0,  0],
+        ['SHUTTLE', 100, 0, 0, 0, 0, "Increase URANIUM gain ability", 10,  5,  0,  0,  0,  0],
     ]
     build_selection = 0
     credit_gain = 1
@@ -91,14 +97,14 @@ def main(stdscr):
         except curses.error:
             pass
         for building in range(len(buildings)):
-            if not buildings[building][2] == 0 and not buildings[building][4] == 0:
+            if not buildings[building][5] == 0 and not buildings[building][7] == 0:
                 try:
-                    total_energy = buildings[building][2] * buildings[building][6] -  buildings[building][2] * buildings[building][5]
+                    total_energy = buildings[building][5] * buildings[building][9] -  buildings[building][5] * buildings[building][8]
                     if total_energy < 0:
                         energy_symbol = ''
                     else:
                         energy_symbol = '+'
-                    overview_win.addstr(building+1, 1, f'{buildings[building][2]} : {buildings[building][0]} - +{buildings[building][2]*buildings[building][4]}C/s {energy_symbol}{total_energy}E/s', WHITE)
+                    overview_win.addstr(building+1, 1, f'{buildings[building][5]} : {buildings[building][0]} - +{buildings[building][5]*buildings[building][7]}C/s {energy_symbol}{total_energy}E/s', WHITE)
                 except curses.error:
                     pass
         overview_win.refresh()
@@ -127,7 +133,7 @@ def main(stdscr):
                 build_style = NORMAL
                 if build_selection == building:
                     build_style = STANDOUT
-                build_win.addstr(building+1, 1, f'{buildings[building][2]} : {buildings[building][0]} - C{buildings[building][1]} - {buildings[building][3]}', WHITE | build_style)
+                build_win.addstr(building+1, 1, f'{buildings[building][5]} : {buildings[building][0]} - C{buildings[building][1]} - {buildings[building][7]}', WHITE | build_style)
             except curses.error:
                 pass
 
@@ -219,11 +225,11 @@ def main(stdscr):
 
         tick += 1
         for building in range(len(buildings)):
-            if buildings[building][2] > 0 and not buildings[building][4] == 0 and tick % 10 == 0:
-                if (buildings[building][5] > 0 and energy > 0) or buildings[building][5] == 0:
-                    money += round(buildings[building][2] * buildings[building][4])
-                energy -= buildings[building][2] * buildings[building][5]
-                energy += buildings[building][2] * buildings[building][6]
+            if buildings[building][5] > 0 and not buildings[building][7] == 0 and tick % 10 == 0:
+                if (buildings[building][8] > 0 and energy > 0) or buildings[building][8] == 0:
+                    money += round(buildings[building][5] * buildings[building][7])
+                energy -= buildings[building][5] * buildings[building][8]
+                energy += buildings[building][5] * buildings[building][9]
                 resources[0][1] = round(money)
                 resources[1][1] = energy
         stdscr.refresh()
