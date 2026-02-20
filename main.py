@@ -36,7 +36,7 @@ def main(stdscr):
     money = 0
     energy = 0
     silver = 0
-    titaniun = 0
+    titanium = 0
     uranium = 0
     resources = [
         ['CREDITS', money],
@@ -46,11 +46,11 @@ def main(stdscr):
         ['URANIUM', uranium],
     ]
     buildings = [
-        # NAME       CC SC TC UC NUM DESC                            OVER  EN PER SIL TIT URA
-        ['MINE',    100, 0, 0, 0, 1, "Increase CREDIT gain ability",   1,  0, 10,  0,  0,  0],
-        ['SHIP',     50, 0, 0, 0, 0, "Increase SILVER gain ability",   0,  1,  0,  0,  0,  0],
-        ['DOCK',    100, 0, 0, 0, 0, "Increase TITANIUM gain ability", 0,  3,  0,  0,  0,  0],
-        ['SHUTTLE', 100, 0, 0, 0, 0, "Increase URANIUM gain ability", 10,  5,  0,  0,  0,  0],
+        # NAME       CC   SC   TC   UC NUM DESC                            OVER  EN PER SIL TIT URA
+        ['MINE',    100,  10,   0,   0, 1, "Increase CREDIT gain ability",   1,  0, 10,  0,  0,  0],
+        ['SHIP',     50,   0,   0,   0, 0, "Increase SILVER gain ability",   0,  1,  0,  0,  0,  0],
+        ['DOCK',      0,   0,  50, 100, 0, "Increase TITANIUM gain ability", 0,  3,  0,  0,  0,  0],
+        ['SHUTTLE',   0,   0, 150,   0, 0, "Increase URANIUM gain ability", 10,  5,  0,  0,  0,  0],
     ]
     build_selection = 0
     credit_gain = 1
@@ -133,7 +133,16 @@ def main(stdscr):
                 build_style = NORMAL
                 if build_selection == building:
                     build_style = STANDOUT
-                build_win.addstr(building+1, 1, f'{buildings[building][5]} : {buildings[building][0]} - C{buildings[building][1]} - {buildings[building][7]}', WHITE | build_style)
+                cost = ""
+                if buildings[building][1] > 0:
+                    cost += f"C{buildings[building][1]} "
+                if buildings[building][2] > 0:
+                    cost += f"S{buildings[building][2]} "
+                if buildings[building][3] > 0:
+                    cost += f"T{buildings[building][3]} "
+                if buildings[building][4] > 0:
+                    cost += f"U{buildings[building][4]} "
+                build_win.addstr(building+1, 1, f'{buildings[building][5]} : {buildings[building][0]} - {cost}- E{buildings[building][7]}', WHITE | build_style)
             except curses.error:
                 pass
 
@@ -157,7 +166,10 @@ def main(stdscr):
     while True:
         h, w = stdscr.getmaxyx()
         top_bar_text = f' SpaceClicker - TIME {tick} - LOCATION {location} '
-        bottom_bar_text = f' (c) GAIN CREDITS - (b) BUILD - (q) QUIT '
+        if build_menu:
+            bottom_bar_text = f' (c) GAIN CREDITS - (u) PURCHASE - (b) MINE - (q) QUIT '
+        else:
+            bottom_bar_text = f' (c) GAIN CREDITS - (b) BUILD - (q) QUIT '
         if h < 6 + len(resources) or w < len(top_bar_text)+1+4:
             stdscr.clear()
             try:
@@ -207,10 +219,27 @@ def main(stdscr):
                 build_selection -= 1
 
         if build_menu and last_key == ord('u'):
-            if money >= buildings[build_selection][1]:
+            prev_count = buildings[build_selection][5]
+            if buildings[build_selection][1] > 0 and money >= buildings[build_selection][1]:
                 money -= buildings[build_selection][1]
                 buildings[build_selection][1] = round(buildings[build_selection][1] * 1.4)
-                buildings[build_selection][2] += 1
+                if prev_count = buildings[build_selection][5] += 1
+                    buildings[build_selection][5] += 1
+            if buildings[build_selection][2] > 0 and money >= buildings[build_selection][2]:
+                money -= buildings[build_selection][2]
+                buildings[build_selection][2] = round(buildings[build_selection][2] * 1.4)
+                if prev_count = buildings[build_selection][5] += 1
+                    buildings[build_selection][5] += 1
+            if buildings[build_selection][3] > 0 and money >= buildings[build_selection][3]:
+                money -= buildings[build_selection][3]
+                buildings[build_selection][3] = round(buildings[build_selection][3] * 1.4)
+                if prev_count = buildings[build_selection][5] += 1
+                    buildings[build_selection][5] += 1
+            if buildings[build_selection][4] > 0 and money >= buildings[build_selection][4]:
+                money -= buildings[build_selection][4]
+                buildings[build_selection][4] = round(buildings[build_selection][4] * 1.4)
+                if prev_count = buildings[build_selection][5] += 1
+                    buildings[build_selection][5] += 1
 
         if last_key == ord('c'):
             money += credit_gain
@@ -228,10 +257,16 @@ def main(stdscr):
             if buildings[building][5] > 0 and not buildings[building][7] == 0 and tick % 10 == 0:
                 if (buildings[building][8] > 0 and energy > 0) or buildings[building][8] == 0:
                     money += round(buildings[building][5] * buildings[building][7])
+                    silver += round(buildings[building][5] * buildings[building][9])
+                    titanium += round(buildings[building][5] * buildings[building][10])
+                    uranium += round(buildings[building][5] * buildings[building][11])
                 energy -= buildings[building][5] * buildings[building][8]
                 energy += buildings[building][5] * buildings[building][9]
                 resources[0][1] = round(money)
                 resources[1][1] = energy
+                resources[2][1] = round(silver)
+                resources[3][1] = round(titanium)
+                resources[4][1] = round(uranium)
         stdscr.refresh()
         time.sleep(0.1)
 
