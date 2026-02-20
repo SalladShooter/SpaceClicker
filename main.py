@@ -223,22 +223,22 @@ def main(stdscr):
             if buildings[build_selection][1] > 0 and money >= buildings[build_selection][1]:
                 money -= buildings[build_selection][1]
                 buildings[build_selection][1] = round(buildings[build_selection][1] * 1.4)
-                if prev_count = buildings[build_selection][5] += 1
+                if prev_count != buildings[build_selection][5]:
                     buildings[build_selection][5] += 1
             if buildings[build_selection][2] > 0 and money >= buildings[build_selection][2]:
                 money -= buildings[build_selection][2]
                 buildings[build_selection][2] = round(buildings[build_selection][2] * 1.4)
-                if prev_count = buildings[build_selection][5] += 1
+                if prev_count != buildings[build_selection][5]:
                     buildings[build_selection][5] += 1
             if buildings[build_selection][3] > 0 and money >= buildings[build_selection][3]:
                 money -= buildings[build_selection][3]
                 buildings[build_selection][3] = round(buildings[build_selection][3] * 1.4)
-                if prev_count = buildings[build_selection][5] += 1
+                if prev_count != buildings[build_selection][5]:
                     buildings[build_selection][5] += 1
             if buildings[build_selection][4] > 0 and money >= buildings[build_selection][4]:
                 money -= buildings[build_selection][4]
                 buildings[build_selection][4] = round(buildings[build_selection][4] * 1.4)
-                if prev_count = buildings[build_selection][5] += 1
+                if prev_count != buildings[build_selection][5]:
                     buildings[build_selection][5] += 1
 
         if last_key == ord('c'):
