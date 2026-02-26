@@ -51,7 +51,7 @@ def main(stdscr):
         ['SPACESHIP', 500, 0, 0, 0, 0, "Increase SILVER gain ability", 5, 5, 0, 2, 0, 0],
         ['SATELLITE', 1000, 150, 50, 0, 0, "Increase TITANIUM gain ability", 10, 0, 50, 0, 4, 0],
         ['SPACE STATION', 10000, 1000, 150, 50, 0, "Increase URANIUM gain ability", 15, 50, 0, 0, 0, 10],
-        ['PARTICLE COLLIDER', 10000, 2500, 500, 0, 0, "Create a large amount of matter", 20, 250, 0, 50, 50, 50],
+        ['PARTICLE COLLIDER', 10000, 2500, 500, 0, "Create a large amount of matter", 20, 250, 0, 50, 50, 50],
         ['DYSON SPHERE', 100000, 10000, 5000, 2500, 0, "Generate a lot of ENERGY", 100, 0, 1000, 0, 0 , 0],
     ]
     build_selection = 0
@@ -169,7 +169,7 @@ def main(stdscr):
         h, w = stdscr.getmaxyx()
         top_bar_text = f' SpaceClicker - TIME {tick} - LOCATION {location} '
         if build_menu:
-            bottom_bar_text = f' (c) GAIN CREDITS - (p) PURCHASE - (b) MINE - (q) QUIT '
+            bottom_bar_text = f' (c) GAIN CREDITS - (u) PURCHASE - (b) MINE - (q) QUIT '
         else:
             bottom_bar_text = f' (c) GAIN CREDITS - (b) BUILD - (q) QUIT '
         if h < 6 + len(resources) or w < len(top_bar_text)+1+4:
@@ -220,29 +220,41 @@ def main(stdscr):
             if build_selection - 1 >= 0:
                 build_selection -= 1
 
-        if build_menu and last_key == ord('p'):
+        if build_menu and last_key == ord('u'):
             prev_count = buildings[build_selection][5]
+            if buildings[build_selection][0] > 0 and money >= buildings[build_selection][0]:
+                money -= buildings[build_selection][0]
+                buildings[build_selection][0] = round(buildings[build_selection][0] * 1.4)
+                if prev_count != buildings[build_selection][5]:
+                    buildings[build_selection][0] += 1
             if buildings[build_selection][1] > 0 and money >= buildings[build_selection][1]:
                 money -= buildings[build_selection][1]
                 buildings[build_selection][1] = round(buildings[build_selection][1] * 1.4)
-                if prev_count == buildings[build_selection][5]:
-                    buildings[build_selection][5] += 1
+                if prev_count != buildings[build_selection][5]:
+                    buildings[build_selection][1] += 1
             if buildings[build_selection][2] > 0 and money >= buildings[build_selection][2]:
                 money -= buildings[build_selection][2]
                 buildings[build_selection][2] = round(buildings[build_selection][2] * 1.4)
-                if prev_count == buildings[build_selection][5]:
-                    buildings[build_selection][5] += 1
+                if prev_count != buildings[build_selection][5]:
+                    buildings[build_selection][2] += 1
             if buildings[build_selection][3] > 0 and money >= buildings[build_selection][3]:
                 money -= buildings[build_selection][3]
                 buildings[build_selection][3] = round(buildings[build_selection][3] * 1.4)
-                if prev_count == buildings[build_selection][5]:
-                    buildings[build_selection][5] += 1
+                if prev_count != buildings[build_selection][3]:
+                    buildings[build_selection][3] += 1
             if buildings[build_selection][4] > 0 and money >= buildings[build_selection][4]:
                 money -= buildings[build_selection][4]
                 buildings[build_selection][4] = round(buildings[build_selection][4] * 1.4)
-                if prev_count == buildings[build_selection][5]:
+                if prev_count != buildings[build_selection][4]:
+                    buildings[build_selection][4] += 1
+            if buildings[build_selection][5] > 0 and money >= buildings[build_selection][5]:
+                money -= buildings[build_selection][5]
+                buildings[build_selection][5] = round(buildings[build_selection][5] * 1.4)
+                if prev_count != buildings[build_selection][5]:
                     buildings[build_selection][5] += 1
-        elif last_key == ord('c'):
+
+
+        if last_key == ord('c'):
             money += credit_gain
             resources[0][1] = money
         elif last_key == ord('b'):
